@@ -5,6 +5,7 @@
   - name: 'update_all_packages'
     prompt: 'Update all packages ?'
     default: 'no'
+
   task:
   # Update necessary packages
   - name: 'update_all_packages'
