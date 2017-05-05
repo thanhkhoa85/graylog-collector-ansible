@@ -1,0 +1,36 @@
+---
+- hosts: all
+
+  vars_prompt:
+  - name: 'update_all_packages'
+    prompt: 'Update all packages ?'
+    default: 'no'
+  task:
+  # Update necessary packages
+  - name: 'update_all_packages'
+    yum: name=* state=lastest
+    when: update_all_packages == 'yes'
+
+  - name: 'Install packages'
+    yum: name={{ item }} state=present
+    with_items:
+      - epel-release
+      - wget
+    tags:
+      - Update necessary packages
+
+  # Install graylog-collector-sidecar
+  - name: 'get install package'
+    yum:
+      name: https://github.com/Graylog2/collector-sidecar/releases/download/0.1.1/collector-sidecar-0.1.1-1.x86_64.rpm
+      state: present
+  # Copy config file
+  - name: 'Copy config file'
+    copy: src=config/collector-sidecar.yml dest=/etc/graylog/collector-sidecar/collector-sidecar.yml mode=0755
+    tags:
+      - Copy config file
+
+  - name: 'Start collector-sidecar service'
+    service: name=collector-sidecar state=started enabled=yes
+    tags:
+      - Start collector-sidecar
